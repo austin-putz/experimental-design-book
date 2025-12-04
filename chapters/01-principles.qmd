@@ -1,0 +1,1023 @@
+# Principles of Experimental Design in Animal Science {#sec-principles}
+
+<div class="learning-objectives">
+### Learning Objectives {.unnumbered}
+
+By the end of this chapter, you will be able to:
+
+1. Explain why proper experimental design is critical in animal science research
+2. Apply the three fundamental principles of experimental design to livestock scenarios
+3. Distinguish between experimental units and observational units in hierarchical livestock data
+4. Determine when effects should be modeled as fixed versus random
+5. Identify sources of variation unique to animal agriculture
+6. Recognize the difference between treatment structure and design structure
+
+</div>
+
+## Why Experimental Design Matters in Animal Agriculture
+
+```{r}
+#| echo: false
+#| message: false
+#| warning: false
+
+# Load required packages
+library(tidyverse)
+library(lme4)
+library(emmeans)
+library(knitr)
+
+# Set default theme for plots
+theme_set(theme_minimal(base_size = 12))
+```
+
+### A Cautionary Tale
+
+Consider this scenario: A graduate student designs a study to compare two dietary treatments in growing pigs. They house 100 pigs (50 per treatment) in 10 pens, with 10 pigs per pen. After 8 weeks, they analyze final body weights using a t-test comparing the 50 pigs in Treatment A versus the 50 pigs in Treatment B.
+
+**Question**: Is this analysis correct?
+
+**Answer**: No. This is a classic example of **pseudoreplication**—one of the most common statistical errors in animal science research.
+
+::: {.callout-warning}
+## The Problem
+
+The pigs within each pen share the same environment, feeder, water source, and social group. They are not independent observations. The experimental unit is the **pen** (n=5 per treatment), not the pig (n=50 per treatment). Using individual pigs as the sample size dramatically inflates the Type I error rate.
+:::
+
+This example illustrates why experimental design expertise is not optional in animal science—it's essential. Unlike agronomic trials where experimental units (plots) can be assumed independent, livestock research inherently involves hierarchical structure, clustering, and dependence among observations.
+
+### The Stakes Are High
+
+Proper experimental design matters in animal agriculture for several critical reasons:
+
+**Economic Constraints**: Animal experiments are expensive. Feed, facilities, labor, and animal costs add up quickly. A poorly designed study wastes limited resources and may produce inconclusive results requiring expensive follow-up studies.
+
+**Ethical Obligations**: Using animals in research carries ethical responsibilities. We must design efficient experiments that answer clear questions with appropriate sample sizes—not too few (underpowered studies) and not too many (wasteful use of animals).
+
+**Biological Complexity**: Animals are dynamic biological systems. They grow, reproduce, get sick, respond to stress, and interact with their environment and each other. This complexity creates multiple sources of variation that must be carefully controlled and accounted for.
+
+**Industry Impact**: Livestock research directly affects production practices, animal welfare, and food security. Invalid conclusions from flawed designs can lead to incorrect recommendations with significant economic and welfare consequences.
+
+**Publication Standards**: Top journals in animal science increasingly require proper experimental design and statistical analysis. Studies with pseudoreplication or inadequate sample sizes are routinely rejected.
+
+::: {.callout-note}
+## Reality Check
+
+A single finishing pig trial in a university research facility can cost $50,000-$100,000. A dairy lactation study can easily exceed $150,000. These investments demand rigorous experimental design planning before any animals are assigned to treatments.
+:::
+
+## The Three Fundamental Principles
+
+All well-designed experiments rest on three foundational principles: **Replication**, **Randomization**, and **Control**. While these principles apply across all experimental sciences, they have unique implications in animal science research.
+
+### Replication
+
+**Replication** means repeating the experiment on multiple independent experimental units. Replication serves two critical purposes:
+
+1. **Estimation of experimental error**: We need multiple observations per treatment to estimate variability and calculate standard errors.
+
+2. **Generalizability**: Results from a single observation might be unusual or unrepresentative. Replication allows us to estimate the typical response and its variability.
+
+#### Replication in Animal Science
+
+The key question in livestock research is: **What is my experimental unit?**
+
+::: {.key-concept}
+### Experimental Unit
+
+An **experimental unit** is the smallest unit to which a treatment is independently applied. It is the unit that should be used to calculate sample size and degrees of freedom for testing treatment effects.
+:::
+
+**Critical principle**: If two observations share some aspect of their environment or treatment application, they are not independent experimental units.
+
+Let's see how this plays out across species:
+
+::: {.example}
+### Swine: Pen vs. Pig
+
+**Scenario**: Testing two dietary treatments in growing pigs.
+
+**Housing**: Pigs are group-housed in pens (10 pigs/pen).
+
+**Question**: What is the experimental unit?
+
+**Answer**: The **pen** is the experimental unit because:
+
+- Diet is applied at the pen level (all pigs in a pen receive the same feed)
+- Pigs in the same pen share environment (temperature, air quality, hygiene)
+- Pigs in the same pen interact socially (competition, dominance)
+- Within-pen observations are correlated (not independent)
+
+If you have 5 pens per treatment, your sample size is **n = 5**, not n = 50.
+
+**Individual pig weights are observational units**—they provide information about pen-level treatment effects but cannot be used as independent replicates for statistical inference about treatments.
+:::
+
+::: {.example}
+### Dairy: Cow vs. Lactation
+
+**Scenario**: Testing four dietary treatments using a crossover design where each cow receives all treatments in different periods.
+
+**Question**: What is the experimental unit?
+
+**Answer**: It depends on the design!
+
+- **Between-cow design** (each cow receives one treatment): Experimental unit = **cow**
+- **Within-cow design** (crossover/Latin square): Experimental unit = **cow × period combination**
+
+In a Latin square with 4 cows and 4 periods, you have 16 experimental units (4 cows × 4 periods), with each treatment applied to 4 of them.
+:::
+
+::: {.example}
+### Poultry: Cage Effects
+
+**Scenario**: Testing lighting programs in laying hens housed in battery cages (5 hens/cage).
+
+**Question**: What is the experimental unit?
+
+**Answer**: The **cage** is the experimental unit because:
+
+- Lighting is applied at the cage level (or room level, depending on design)
+- Hens in the same cage share microenvironment
+- Social interactions affect laying behavior
+- Individual hen egg production records are observational units
+:::
+
+::: {.example}
+### Meat Science: Multiple Samples from the Same Carcass
+
+**Scenario**: Testing three aging periods on beef tenderness. From each carcass, you collect three steaks from the same muscle and assign each steak to a different aging period.
+
+**Question**: What is the experimental unit?
+
+**Answer**: The **steak** is the experimental unit for aging treatment because:
+
+- Aging treatment is applied independently to individual steaks
+- Each steak can be assigned to a different aging period
+
+However, steaks from the same carcass are not independent—they share genetic background, pre-harvest management, and inherent meat quality. This correlation must be modeled using a **split-plot design** (covered in Chapter 5).
+
+Contrast this with a study where entire carcasses are assigned to electrical stimulation treatments. In that case, the **carcass** is the experimental unit for stimulation treatment.
+:::
+
+#### Common Replication Mistakes
+
+::: {.callout-warning}
+## Mistake 1: Confusing Observational Units with Experimental Units
+
+**Wrong**: Measuring 5 samples from each of 20 carcasses and claiming n = 100.
+
+**Right**: Recognizing that samples from the same carcass are correlated; n = 20 carcasses, with 5 repeated measures per carcass.
+:::
+
+::: {.callout-warning}
+## Mistake 2: Insufficient Replication at the Correct Level
+
+**Wrong**: Using 2 pens per treatment with 25 pigs per pen and analyzing individual pig data (giving the illusion of n = 25).
+
+**Right**: Recognizing you have only n = 2 pens per treatment, which is grossly inadequate for detecting treatment effects or estimating error variance.
+:::
+
+::: {.callout-warning}
+## Mistake 3: Combining Observational Units Inappropriately
+
+**Wrong**: Taking multiple blood samples from the same pig over time and treating them as independent observations when testing a treatment effect.
+
+**Right**: Recognizing this is a **repeated measures design** where multiple observations are correlated within pig (see Chapter 6).
+:::
+
+### Randomization
+
+**Randomization** is the random assignment of treatments to experimental units. Randomization serves two purposes:
+
+1. **Eliminates bias** in treatment assignment
+2. **Validates statistical inference** by ensuring treatment groups are comparable on average
+
+#### Why Randomization Matters
+
+Without randomization, systematic differences between treatment groups can confound treatment effects. For example:
+
+- If you assign the heaviest pigs to Treatment A and the lightest to Treatment B, any difference in growth rate could be due to initial weight rather than treatment
+- If you assign morning milking times to Treatment A and afternoon to Treatment B, time-of-day effects confound treatment effects
+- If you assign healthier-looking animals to one treatment, health status confounds treatment response
+
+::: {.callout-important}
+## Randomization is Not Optional
+
+"Convenience" assignment of treatments (e.g., first pen gets Treatment A, second pen gets Treatment B, alternating down the barn) is **not random**. This creates potential for systematic bias if some environmental gradient exists (e.g., temperature, ventilation, or disease pressure varies by barn location).
+
+**Always use a proper randomization method** (random number generators, randomization software, or drawing numbers from a hat).
+:::
+
+#### Randomization in Practice
+
+Here's how to randomize a simple pen study in R:
+
+```{r}
+# Example: Randomizing 20 pens to 4 dietary treatments
+
+set.seed(2025)  # For reproducibility
+
+# Create pen identifiers
+pens <- data.frame(
+  pen_id = 1:20,
+  pen_location = rep(c("North", "South"), each = 10)
+)
+
+# Randomly assign treatments (5 pens per treatment)
+pens$treatment <- sample(rep(c("Control", "Treatment_A", "Treatment_B", "Treatment_C"),
+                             each = 5))
+
+# View the randomization
+pens %>%
+  arrange(treatment) %>%
+  kable(caption = "Randomization of 20 pens to 4 treatments")
+```
+
+::: {.callout-tip}
+## Stratified Randomization
+
+If you know certain blocking factors beforehand (e.g., initial body weight, parity, location), you can perform **stratified randomization** within blocks. This is the foundation of randomized complete block designs (Chapter 2).
+:::
+
+#### Constraints on Randomization in Animal Studies
+
+Unlike field plot experiments where any plot can receive any treatment, animal studies often face practical constraints:
+
+**Facility Constraints**:
+- Separate rooms may be needed for different treatments (e.g., different environmental conditions)
+- Feed delivery systems may group certain pens together
+- Milking parlor schedules may dictate which cows can be measured when
+
+**Management Constraints**:
+- Some treatments require specialized equipment or timing
+- Sexes may need to be separated
+- Animals at different life stages may need different housing
+
+**Biological Constraints**:
+- Litter effects in swine/sheep may require assigning littermates to the same treatment
+- Breeding programs may dictate genetic groups
+
+When complete randomization is impossible, we use **restricted randomization** where treatments are randomly assigned within constraints. This must be reflected in the statistical model.
+
+### Control (Local Control)
+
+**Control** (sometimes called **local control**) refers to reducing experimental error by:
+
+1. **Making experimental units as uniform as possible** before applying treatments
+2. **Controlling extraneous sources of variation** through blocking, standardization, or measurement as covariates
+3. **Standardizing management** to minimize non-treatment variation
+
+#### Strategies for Local Control
+
+##### 1. Blocking
+
+Group experimental units into homogeneous blocks and assign treatments within blocks:
+
+::: {.example}
+### Beef Feedlot: Blocking by Initial Weight
+
+**Problem**: Steers arriving at the feedlot vary widely in initial body weight (300-500 kg).
+
+**Solution**: Group steers into weight blocks (e.g., light, medium, heavy) and randomly assign implant treatments within each block.
+
+**Benefit**: Weight-related variation is controlled, making treatment effects easier to detect.
+:::
+
+##### 2. Standardization
+
+Make experimental units as similar as possible:
+
+- **Age/weight matching**: Start animals at similar ages or body weights
+- **Genetic uniformity**: Use similar genetic lines (but balance with generalizability)
+- **Sex separation**: Analyze males and females separately or as a factorial factor
+- **Parity grouping** in dairy: Compare cows at similar lactation numbers
+
+##### 3. Covariate Measurement
+
+Measure variables that affect the response but cannot be controlled:
+
+::: {.example}
+### Swine Growth: Initial Body Weight as Covariate
+
+**Situation**: Pigs vary in weaning weight despite best efforts to standardize.
+
+**Solution**: Measure initial weight and use **ANCOVA** (Analysis of Covariance) to adjust final weight for initial weight.
+
+**Benefit**: Reduces error variance and increases power to detect treatment effects (see Chapter 9).
+:::
+
+::: {.callout-tip}
+## Control vs. Randomization
+
+**Control reduces error variance** (making effects easier to detect), while **randomization prevents bias** (making effects valid). Both are essential, but they serve different purposes.
+:::
+
+## Sources of Variation in Livestock Research
+
+Understanding sources of variation is critical for designing experiments that can detect treatment effects above the background "noise" of biological variability.
+
+### Hierarchical Sources of Variation
+
+Livestock data typically exhibit hierarchical structure with variation at multiple levels:
+
+**Level 1: Between Farms/Herds**
+- Management practices
+- Genetic lines
+- Environmental conditions
+- Disease status
+
+**Level 2: Between Groups Within Farm** (e.g., pens, pastures, lactation groups)
+- Microenvironment (temperature, humidity, air quality)
+- Feeder/waterer quality
+- Social group composition
+- Stocking density
+
+**Level 3: Within Group** (individual animals)
+- Genetic variation (even in purebred lines)
+- Dominance/social hierarchy
+- Individual health status
+- Developmental stage
+
+**Level 4: Within Animal Over Time** (repeated measures)
+- Growth/lactation curves
+- Adaptation to treatments
+- Seasonal effects
+- Measurement error
+
+Each level contributes to total phenotypic variance:
+
+$$
+\sigma^2_{total} = \sigma^2_{farm} + \sigma^2_{group} + \sigma^2_{animal} + \sigma^2_{time} + \sigma^2_{error}
+$$
+
+::: {.callout-important}
+## The Fundamental Question
+
+When designing an experiment, ask: **At what level is treatment applied, and at what levels do I observe responses?**
+
+If treatment is applied at the pen level but responses are measured at the pig level, I must account for pen-level variation in my model.
+:::
+
+### The Intraclass Correlation Coefficient (ICC)
+
+The **intraclass correlation coefficient (ICC)** quantifies the proportion of total variance that occurs between groups:
+
+$$
+\rho = \frac{\sigma^2_{group}}{\sigma^2_{group} + \sigma^2_{within}}
+$$
+
+Where:
+- $\sigma^2_{group}$ = variance between groups (e.g., pens)
+- $\sigma^2_{within}$ = variance within groups (e.g., among pigs within pens)
+
+**Interpretation**:
+- ICC = 0: No clustering; observations are independent
+- ICC = 0.1: 10% of variance is between groups; moderate clustering
+- ICC = 0.5: 50% of variance is between groups; strong clustering
+
+**Why ICC matters**: The ICC determines the "effective sample size" when observations are clustered. If you ignore clustering and analyze individual observations as if they were independent, your actual Type I error rate will be much higher than the nominal α = 0.05.
+
+::: {.example}
+### Swine Pen Study: ICC Calculation
+
+Suppose we measure final body weight in pigs (10 pigs per pen, 20 pens total). We fit a model with pen as a random effect:
+
+```{r}
+# Simulate data for illustration
+set.seed(123)
+n_pens <- 20
+pigs_per_pen <- 10
+
+# Simulate pen effects (between-pen variation)
+pen_effects <- rnorm(n_pens, mean = 0, sd = 5)  # σ_pen = 5 kg
+
+# Simulate pig data
+pig_data <- data.frame(
+  pen = rep(1:n_pens, each = pigs_per_pen),
+  pig = 1:(n_pens * pigs_per_pen)
+)
+
+# Add pen effects and within-pen variation
+pig_data$body_weight <- 100 +
+  pen_effects[pig_data$pen] +
+  rnorm(n_pens * pigs_per_pen, mean = 0, sd = 8)  # σ_within = 8 kg
+
+# Fit mixed model
+model <- lmer(body_weight ~ 1 + (1|pen), data = pig_data)
+
+# Extract variance components
+vc <- as.data.frame(VarCorr(model))
+sigma_pen <- vc$sdcor[1]
+sigma_within <- sigma(model)
+
+# Calculate ICC
+icc <- sigma_pen^2 / (sigma_pen^2 + sigma_within^2)
+
+cat("Variance components:\n")
+cat(sprintf("  Between-pen SD: %.2f kg\n", sigma_pen))
+cat(sprintf("  Within-pen SD: %.2f kg\n", sigma_within))
+cat(sprintf("  ICC: %.3f\n", icc))
+cat(sprintf("\nInterpretation: %.1f%% of variation in body weight is between pens.\n",
+            icc * 100))
+```
+
+With ICC = 0.28, about 28% of variation in body weight is between pens. This means observations within pens are moderately correlated, and we must account for pen effects in our analysis.
+:::
+
+### Practical Implications
+
+Understanding sources of variation helps you:
+
+1. **Design better experiments**: Block or stratify based on known sources of variation
+2. **Choose appropriate models**: Include random effects for hierarchical structure
+3. **Calculate realistic sample sizes**: Account for clustering and correlation
+4. **Interpret results correctly**: Recognize that some variation is biological noise, not treatment effects
+
+## Experimental Units vs. Observational Units
+
+This is arguably the most critical concept in livestock research, yet it's where most mistakes occur. Let's formalize the distinction:
+
+::: {.key-concept}
+### Definitions
+
+**Experimental Unit**: The smallest unit to which a treatment is *independently* applied. This is the unit of replication for testing treatment effects.
+
+**Observational Unit** (or Sampling Unit): The unit on which measurements are taken. Multiple observational units may exist within a single experimental unit.
+:::
+
+### The "Pen Problem"
+
+The "pen problem" is pervasive in swine and beef research:
+
+**Situation**: Pigs or cattle are group-housed in pens. Dietary or management treatments are applied at the pen level (all animals in a pen receive the same treatment). Individual animal performance (body weight, feed intake, etc.) is measured.
+
+**Question**: What is the experimental unit?
+
+**Answer**: The **pen** is the experimental unit, not the individual animal.
+
+**Why?**: Because:
+1. Treatment is applied at the pen level
+2. Animals within pens share environment, feeders, and social interactions
+3. Individual animal observations are correlated (not independent)
+
+**Consequence**: If you have 5 pens per treatment with 10 animals per pen, your sample size is **n = 5**, not n = 50. Your statistical test for treatment effects must use pen means, or equivalently, a mixed model with pen as a random effect.
+
+#### Correct Analysis Approaches
+
+**Option 1: Analyze Pen Means**
+
+```{r}
+#| eval: false
+
+# Aggregate to pen level
+pen_means <- pig_data %>%
+  group_by(pen, treatment) %>%
+  summarize(mean_weight = mean(final_weight))
+
+# Analyze pen means
+model <- lm(mean_weight ~ treatment, data = pen_means)
+anova(model)
+```
+
+**Option 2: Mixed Model with Pen as Random Effect**
+
+```{r}
+#| eval: false
+
+# Include all individual observations but account for pen clustering
+model <- lmer(final_weight ~ treatment + (1|pen), data = pig_data)
+anova(model)  # Test for treatment effect
+```
+
+Both approaches give the same F-statistic and p-value for testing treatment effects because they both correctly identify pen as the experimental unit.
+
+::: {.callout-warning}
+## Incorrect Analysis
+
+```{r}
+#| eval: false
+
+# WRONG: Treating individual pigs as independent
+model_wrong <- lm(final_weight ~ treatment, data = pig_data)
+anova(model_wrong)  # Inflated Type I error rate!
+```
+
+This analysis treats individual pigs as independent, ignoring pen-level correlation. It will give artificially small p-values and high "significance" for treatment effects that may not actually exist.
+:::
+
+### The "Litter Problem"
+
+Similar to the pen problem, the litter problem occurs in swine, sheep, and other species with multiple offspring per birth:
+
+**Situation**: Piglets or lambs are born in litters. Treatments may be applied to individual animals within or across litters.
+
+**Question**: What is the experimental unit?
+
+**Answer**: It depends on how treatments are assigned!
+
+**Case 1: Treatments assigned to litters**
+- If all piglets in a litter receive the same treatment → litter is the experimental unit
+- Example: Sow receives a gestation diet treatment affecting all offspring
+
+**Case 2: Treatments assigned to individuals within litters**
+- If piglets within the same litter receive different treatments → individual is the experimental unit
+- However, littermates are still correlated (shared genetics, prenatal environment)
+- Must model litter as a random effect
+
+::: {.example}
+### Piglet Birth Weight Study
+
+**Design**: Testing two creep feed formulations. From each of 20 litters, randomly assign half the piglets to Creep Feed A and half to Creep Feed B.
+
+**Experimental unit**: Individual piglet (because treatment is applied at piglet level)
+
+**Complication**: Piglets within litters are correlated (shared genetics, uterine environment, sow milk)
+
+**Correct model**:
+```{r}
+#| eval: false
+
+model <- lmer(weaning_weight ~ creep_feed + (1|litter), data = piglet_data)
+```
+
+Here, `creep_feed` is a fixed effect (testing treatment differences), and `litter` is a random effect (accounting for correlation among littermates).
+:::
+
+### Summary Table: Experimental Units by Species
+
+| Species | Common Scenario | Experimental Unit | Observational Unit | Random Effect in Model |
+|---------|----------------|-------------------|-------------------|------------------------|
+| Swine (group-housed) | Pen-level diet treatment | Pen | Individual pig | Pen |
+| Swine (individual) | Individual diet treatment | Pig | Pig (possibly multiple measures) | Animal (if repeated measures) |
+| Beef (feedlot) | Pen-level implant strategy | Pen | Individual steer | Pen |
+| Beef (pasture) | Pasture-level grazing management | Pasture | Individual animal | Pasture |
+| Dairy (crossover) | Cow receives multiple diets | Cow × Period | Daily milk records | Cow, Period |
+| Dairy (parallel) | Cow receives one diet | Cow | Daily milk records | Cow (if repeated) |
+| Poultry (caged) | Cage-level lighting program | Cage | Individual hen | Cage |
+| Poultry (floor) | Pen-level diet | Pen | Individual bird | Pen |
+| Sheep (grazing) | Pasture-level supplementation | Pasture | Individual lamb | Pasture |
+| Meat science | Carcass-level electrical stimulation | Carcass | Multiple muscles/cuts | Carcass |
+
+## Treatment Structure vs. Design Structure
+
+Understanding the distinction between **treatment structure** and **design structure** helps clarify experimental planning.
+
+### Treatment Structure
+
+**Treatment structure** describes how treatments are formed and related to each other.
+
+**Types**:
+
+1. **Single factor**: One treatment factor with multiple levels
+   - Example: Four dietary protein levels (12%, 14%, 16%, 18%)
+
+2. **Factorial**: Multiple factors, each with multiple levels, arranged in all combinations
+   - Example: 2 diet types × 3 feeding frequencies = 6 treatment combinations
+
+3. **Nested**: Levels of one factor exist within levels of another
+   - Example: Boars nested within genetic lines (different boars in each line)
+
+### Design Structure
+
+**Design structure** describes how treatments are assigned to experimental units and how experimental units are organized.
+
+**Types**:
+
+1. **Completely Randomized Design (CRD)**: Treatments randomly assigned to homogeneous experimental units
+
+2. **Randomized Complete Block Design (RCBD)**: Experimental units grouped into blocks; treatments randomly assigned within blocks
+
+3. **Split-plot**: Two (or more) experimental unit sizes; whole-plot treatments applied to larger units, subplot treatments to smaller units
+
+4. **Repeated measures**: Same experimental unit measured multiple times (often over time)
+
+5. **Crossover/Latin Square**: Each experimental unit receives multiple treatments in sequence
+
+### Examples Combining Treatment and Design Structures
+
+::: {.example}
+### Example 1: Factorial Treatment Structure in RCBD
+
+**Treatment structure**: 2 × 2 factorial
+- Factor A: Diet type (corn-based vs. wheat-based)
+- Factor B: Sex (barrow vs. gilt)
+- Gives 4 treatment combinations
+
+**Design structure**: RCBD with initial weight blocks
+- 4 weight blocks
+- 4 pens per block (one per treatment combination)
+- 16 pens total
+
+**Model**:
+```{r}
+#| eval: false
+
+model <- lm(avg_daily_gain ~ diet * sex + block, data = pen_data)
+```
+:::
+
+::: {.example}
+### Example 2: Single-Factor Treatment Structure in Split-Plot Design
+
+**Treatment structure**: Single factor with 3 levels
+- Aging periods: 7, 14, 21 days
+
+**Design structure**: Split-plot
+- Whole plot: Carcass (30 carcasses)
+- Subplot: Steak from each carcass assigned to each aging period
+
+**Model**:
+```{r}
+#| eval: false
+
+model <- lmer(tenderness ~ aging + (1|carcass) + (1|carcass:aging),
+              data = steak_data)
+```
+:::
+
+The key insight: **Treatment structure and design structure are independent choices**. You can have any treatment structure (single factor, factorial, etc.) combined with any design structure (CRD, RCBD, split-plot, etc.), as long as the design provides sufficient replication for all treatment effects you want to test.
+
+## Fixed vs. Random Effects
+
+A critical modeling decision is whether to treat factors as **fixed effects** or **random effects**. This decision affects both how you interpret results and how you calculate test statistics.
+
+### Definitions
+
+::: {.key-concept}
+**Fixed Effect**: A factor with a fixed set of levels that you specifically chose to study. Inference is limited to those specific levels.
+
+**Random Effect**: A factor whose levels are a random sample from a larger population of possible levels. Inference extends to the broader population.
+:::
+
+### Decision Framework
+
+Ask these questions:
+
+1. **Did I specifically choose these levels, or are they a random sample from a population?**
+   - Specific choice → Fixed
+   - Random sample → Random
+
+2. **Am I interested in differences among these specific levels, or in the variability among levels in general?**
+   - Specific differences → Fixed
+   - Variability → Random
+
+3. **Could I have used different levels, and would I want my conclusions to generalize beyond these specific levels?**
+   - No, these specific levels matter → Fixed
+   - Yes, these could have been any levels → Random
+
+### Examples
+
+| Factor | Fixed or Random? | Justification |
+|--------|-----------------|---------------|
+| Dietary treatment | Fixed | Specifically designed and compared; inference is about *these* diets |
+| Genetic line (3 specific lines) | Fixed | Specifically chosen commercial lines; inference about *these* lines |
+| Pen | Random | Specific pens are arbitrary; could have been any pens; inference about pen-level variation |
+| Cow | Random (usually) | Cows are a sample from the population; inference about cow-level variation |
+| Time period in Latin Square | Fixed (sometimes) | If specific time periods matter (e.g., seasonal effects) |
+| Time period in Latin Square | Random (sometimes) | If periods are arbitrary control for time effects |
+| Litter | Random | Litters are a sample; inference about litter-level variation |
+| Sex | Fixed | Only two sexes; specifically interested in male vs. female differences |
+| Initial weight block | Fixed (usually) | Chosen to control variation; less interest in block effects themselves |
+
+::: {.callout-important}
+## A Practical Rule of Thumb
+
+**Random effects are usually:**
+- Grouping factors (pen, litter, farm, sire, dam)
+- Experimental units in hierarchical designs
+- Factors with many levels that are arbitrarily sampled
+- Factors used to account for correlation structure
+
+**Fixed effects are usually:**
+- Treatment factors (the main research question)
+- Blocking factors with few levels
+- Factors where you want to estimate and compare specific level means
+:::
+
+### Consequences of Fixed vs. Random
+
+**Model Specification**:
+
+```{r}
+#| eval: false
+
+# Fixed effect: estimate separate means for each level
+lm(response ~ treatment, data = mydata)
+
+# Random effect: estimate variance component
+lmer(response ~ (1|pen), data = mydata)
+
+# Both: treatment is fixed, pen is random
+lmer(response ~ treatment + (1|pen), data = mydata)
+```
+
+**Interpretation**:
+
+- **Fixed effects**: We estimate and compare specific level means. We ask: "Is Treatment A different from Treatment B?"
+
+- **Random effects**: We estimate variance components. We ask: "How much variation exists among pens? Is pen-level variation substantial?"
+
+**Degrees of Freedom**:
+
+- Fixed effects with $k$ levels consume $k-1$ degrees of freedom
+- Random effects consume fewer degrees of freedom (typically 1 for variance component)
+
+**Inference**:
+
+- **Fixed effects**: Inference is limited to the specific levels studied. "Treatment A increases gain by 50 g/day compared to Control."
+
+- **Random effects**: Inference extends to the population. "Pen-to-pen variation accounts for 30% of total variation in gain."
+
+### Mixed Models
+
+**Mixed models** contain both fixed and random effects. They are the workhorse of modern livestock research because they naturally accommodate hierarchical data structure.
+
+**General form**:
+
+$$
+\mathbf{y} = \mathbf{X}\boldsymbol{\beta} + \mathbf{Z}\boldsymbol{\gamma} + \boldsymbol{\epsilon}
+$$
+
+Where:
+- $\mathbf{y}$ = response vector
+- $\mathbf{X}\boldsymbol{\beta}$ = fixed effects (design matrix × fixed effect parameters)
+- $\mathbf{Z}\boldsymbol{\gamma}$ = random effects (design matrix × random effect parameters)
+- $\boldsymbol{\epsilon}$ = residual error
+
+Assumptions:
+- $\boldsymbol{\gamma} \sim N(\mathbf{0}, \mathbf{G})$ (random effects are normally distributed)
+- $\boldsymbol{\epsilon} \sim N(\mathbf{0}, \mathbf{R})$ (residuals are normally distributed)
+
+**Why mixed models?**
+
+1. Correctly account for correlation among observations
+2. Provide valid standard errors and p-values
+3. Partition variance into meaningful components
+4. Handle unbalanced data gracefully
+5. Allow modeling of complex covariance structures (repeated measures, spatial correlation, etc.)
+
+## Variance Partitioning
+
+In hierarchical livestock data, total variance can be partitioned into components at each level. This is fundamental to understanding mixed models.
+
+### Simple Two-Level Example
+
+Consider pigs nested within pens. The model is:
+
+$$
+Y_{ij} = \mu + \tau_i + p_{ij} + \epsilon_{ijk}
+$$
+
+Where:
+- $Y_{ijk}$ = response (e.g., body weight) for pig $k$ in pen $j$ receiving treatment $i$
+- $\mu$ = overall mean
+- $\tau_i$ = fixed effect of treatment $i$
+- $p_{ij} \sim N(0, \sigma^2_p)$ = random effect of pen $j$ within treatment $i$
+- $\epsilon_{ijk} \sim N(0, \sigma^2)$ = residual error (pig-level variation within pen)
+
+**Variance components**:
+- $\sigma^2_p$ = between-pen variance (how much pens differ)
+- $\sigma^2$ = within-pen variance (how much pigs differ within pens)
+
+**Total variance**:
+$$
+\sigma^2_{total} = \sigma^2_p + \sigma^2
+$$
+
+**Intraclass correlation**:
+$$
+\rho = \frac{\sigma^2_p}{\sigma^2_p + \sigma^2}
+$$
+
+### Interpreting Variance Components
+
+::: {.example}
+### Swine Growth Study Results
+
+Suppose we fit the model above and obtain:
+
+- $\hat{\sigma}_p = 4.2$ kg (between-pen SD)
+- $\hat{\sigma} = 8.5$ kg (within-pen SD)
+
+**Variance components**:
+- $\hat{\sigma}^2_p = 17.6$ kg²
+- $\hat{\sigma}^2 = 72.3$ kg²
+- Total variance = 90.0 kg²
+
+**ICC**:
+$$
+\hat{\rho} = \frac{17.6}{17.6 + 72.3} = 0.196
+$$
+
+**Interpretation**: About 20% of variation in body weight is due to pen effects (shared environment, social group, feeder quality, etc.), while 80% is due to individual pig variation within pens.
+
+**Implication**: Individual pigs within the same pen are moderately correlated (r ≈ 0.20). Ignoring this correlation leads to standard errors that are too small and p-values that are too optimistic.
+:::
+
+## Roadmap of the Book
+
+Now that we've established foundational principles, here's where we're headed:
+
+**Chapters 2-3: Basic Designs**
+- Chapter 2: Completely randomized and randomized complete block designs
+- Chapter 3: Factorial treatment structures and interactions
+
+**Chapters 4-7: Complex Designs**
+- Chapter 4: Nested and hierarchical designs (addressing the pen problem)
+- Chapter 5: Split-plot designs (multiple experimental unit sizes)
+- Chapter 6: Repeated measures designs (longitudinal data)
+- Chapter 7: Crossover and Latin square designs (within-subject designs)
+
+**Chapters 8-9: Analysis Refinements**
+- Chapter 8: Sample size, power, and precision (planning experiments)
+- Chapter 9: ANCOVA (using covariates to increase precision)
+
+**Chapter 10: Practical Guidance**
+- Common pitfalls and how to avoid them
+- Species-specific recommendations
+- Troubleshooting guide for design selection
+
+Each chapter includes species-specific examples with complete R code, interpretation guidance, and practice problems.
+
+## Common Mistakes to Avoid
+
+Let's summarize the critical mistakes that doom many animal science experiments:
+
+::: {.callout-warning}
+### Mistake 1: Pseudoreplication
+
+**What**: Treating non-independent observations (e.g., pigs within pens) as independent replicates.
+
+**Consequence**: Inflated Type I error; false positives; spurious "significant" results.
+
+**Solution**: Correctly identify the experimental unit and use mixed models to account for hierarchical structure.
+:::
+
+::: {.callout-warning}
+### Mistake 2: Insufficient Replication
+
+**What**: Too few experimental units to detect biologically meaningful effects.
+
+**Example**: 2-3 pens per treatment.
+
+**Consequence**: Low power; inability to detect real treatment effects; wasted resources.
+
+**Solution**: Conduct power analysis *before* the experiment (Chapter 8). Aim for at least 5-6 experimental units per treatment as a minimum.
+:::
+
+::: {.callout-warning}
+### Mistake 3: Confounding
+
+**What**: Treatment effects mixed up with other factors that also affect the response.
+
+**Example**: All pens receiving Treatment A are in one room, all pens receiving Treatment B are in another room.
+
+**Consequence**: Cannot distinguish treatment effects from room effects.
+
+**Solution**: Randomize treatments across all potential confounding factors. If complete randomization is impossible (e.g., separate rooms required), explicitly model room effects.
+:::
+
+::: {.callout-warning}
+### Mistake 4: Wrong Error Term
+
+**What**: Using the wrong denominator for F-tests, typically by ignoring hierarchical structure.
+
+**Example**: Testing pen-level treatment effects using pig-level error term.
+
+**Consequence**: Invalid p-values; improper inference.
+
+**Solution**: Match error term to experimental unit. In mixed models, this is handled automatically when random effects are correctly specified.
+:::
+
+::: {.callout-warning}
+### Mistake 5: Post-Hoc Design Decisions
+
+**What**: Making design decisions (e.g., blocking, covariate adjustment) after seeing the data.
+
+**Consequence**: Bias; p-hacking; inflation of Type I error.
+
+**Solution**: Plan your design and analysis strategy *before* data collection. Document your analysis plan.
+:::
+
+<div class="practice-problems">
+
+## Practice Problems
+
+### Problem 1: Identifying Experimental Units
+
+For each scenario, identify the experimental unit and observational unit:
+
+a) A study compares three milk replacers for dairy calves. Calves are individually housed in hutches and randomly assigned to one of three milk replacers. Body weight is measured weekly for 8 weeks.
+
+b) A poultry study tests four dietary treatments. Twenty-four floor pens are used (6 pens per treatment), with 25 broilers per pen. Individual bird weights are recorded at 6 weeks.
+
+c) A meat science study evaluates electrical stimulation of carcasses. Thirty beef carcasses are randomly assigned to either electrical stimulation or control (15 per treatment). From each carcass, steaks are collected from the longissimus, semimembranosus, and biceps femoris muscles. Warner-Bratzler shear force is measured on each steak.
+
+### Problem 2: Fixed vs. Random Effects
+
+For the following factors, indicate whether they should typically be modeled as fixed or random effects, and justify your answer:
+
+a) Farrowing crate in a study comparing gestation housing systems
+b) Sex of the animal (male vs. female)
+c) Days in milk (as a continuous predictor of milk yield)
+d) Three commercial genetic lines being compared
+e) Block (initial weight group) in an RCBD
+
+### Problem 3: Calculating ICC
+
+In a feedlot study, 40 steers were housed in 8 pens (5 steers per pen). Average daily gain (kg/day) was measured. A mixed model with pen as a random effect yielded:
+
+- Between-pen variance: $\sigma^2_p = 0.0048$ kg²/day²
+- Within-pen variance: $\sigma^2 = 0.0152$ kg²/day²
+
+a) Calculate the ICC.
+b) Interpret the ICC in practical terms.
+c) If you incorrectly analyzed individual steers as independent, how would this affect your conclusions?
+
+### Problem 4: Experimental Design Critique
+
+A graduate student conducts a study with the following design:
+
+- **Objective**: Compare two dietary treatments on growth performance in pigs
+- **Animals**: 60 pigs (30 per treatment)
+- **Housing**: Pigs are group-housed in 6 pens (10 pigs per pen)
+- **Treatment Assignment**: All pens in the north half of the barn receive Treatment A; all pens in the south half receive Treatment B
+- **Measurements**: Individual pig weights at start and end (8 weeks)
+- **Analysis**: Two-sample t-test comparing mean final weight of 30 pigs in Treatment A vs. 30 pigs in Treatment B
+
+Identify at least three major problems with this design and analysis. For each problem, suggest a correction.
+
+### Problem 5: Model Specification
+
+Write the statistical model (including notation) for the following scenario:
+
+A swine study compares four dietary treatments arranged in a 2 × 2 factorial (two protein levels × two amino acid supplementation levels). Forty pens are used (10 pens per treatment combination), with 8 pigs per pen. Pens are blocked by location in the barn (4 blocks of 10 pens each). The response is average daily gain.
+
+Specify which factors are fixed and which are random.
+
+</div>
+
+## Further Reading
+
+### Essential References
+
+- **Hurlbert, S. H. (1984)**. Pseudoreplication and the design of ecological field experiments. *Ecological Monographs*, 54(2), 187-211. [A classic paper on pseudoreplication, highly relevant to animal science.]
+
+- **Kuehl, R. O. (2000)**. *Design of Experiments: Statistical Principles of Research Design and Analysis* (2nd ed.). Duxbury Press. [Comprehensive coverage of design principles with agricultural examples.]
+
+- **Littell, R. C., Milliken, G. A., Stroup, W. W., Wolfinger, R. D., & Schabenberger, O. (2006)**. *SAS for Mixed Models* (2nd ed.). SAS Institute. [Authoritative treatment of mixed models; concepts translate to R.]
+
+- **Montgomery, D. C. (2017)**. *Design and Analysis of Experiments* (9th ed.). John Wiley & Sons. [Standard textbook on experimental design.]
+
+- **St-Pierre, N. R. (2007)**. Design and analysis of pen studies in the animal sciences. *Journal of Dairy Science*, 90(Suppl. 1), E87-E99. [Directly addresses the pen problem in dairy and livestock research.]
+
+### Additional Resources
+
+- **Pinheiro, J. C., & Bates, D. M. (2000)**. *Mixed-Effects Models in S and S-PLUS*. Springer. [Theoretical foundation for mixed models in R.]
+
+- **Bolker, B. M., et al. (2009)**. Generalized linear mixed models: a practical guide for ecology and evolution. *Trends in Ecology & Evolution*, 24(3), 127-135. [Extends mixed models to non-normal data.]
+
+- **R packages documentation**: `lme4`, `nlme`, `emmeans`, `lmerTest`—all have excellent vignettes
+
+### Online Resources
+
+- **Mixed Models in R**: [https://m-clark.github.io/mixed-models-with-R/](https://m-clark.github.io/mixed-models-with-R/)
+- **R for Data Science**: [https://r4ds.had.co.nz/](https://r4ds.had.co.nz/)
+- **Statistical Rethinking** (McElreath): [https://xcelab.net/rm/statistical-rethinking/](https://xcelab.net/rm/statistical-rethinking/)
+
+## Summary
+
+In this chapter, we established the foundational principles of experimental design in animal science:
+
+1. **Why design matters**: Economic, ethical, and scientific imperatives demand rigorous experimental design in livestock research.
+
+2. **Three fundamental principles**:
+   - **Replication**: Multiple independent experimental units per treatment
+   - **Randomization**: Unbiased treatment assignment to eliminate systematic bias
+   - **Control**: Reducing error variance through blocking, standardization, and covariates
+
+3. **Experimental units**: The critical distinction between experimental units (what receives treatment) and observational units (what is measured). The experimental unit determines sample size and replication.
+
+4. **Sources of variation**: Livestock data are hierarchical, with variation at multiple levels (farm, pen, animal, time). The intraclass correlation coefficient quantifies clustering.
+
+5. **Treatment vs. design structure**: Independent choices that define how treatments are formed and how they are assigned to experimental units.
+
+6. **Fixed vs. random effects**: Fixed effects represent specific levels of interest; random effects represent variation among sampled levels from a population.
+
+7. **Mixed models**: The essential tool for livestock research, accounting for hierarchical structure and correlation.
+
+With these foundational concepts in place, we're ready to explore specific experimental designs in the chapters ahead. We'll start with the simplest designs (CRD and RCBD) in Chapter 2 and build toward more complex structures in subsequent chapters.
+
+::: {.callout-tip}
+### Before Moving On
+
+Make sure you're comfortable with:
+- Identifying experimental units in various livestock scenarios
+- Understanding why observations within groups (pens, litters, cages) are correlated
+- Knowing when to use fixed vs. random effects
+- Recognizing the ICC as a measure of clustering
+
+If any of these concepts are still unclear, review the relevant sections before proceeding to Chapter 2.
+:::

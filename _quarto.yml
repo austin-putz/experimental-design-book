@@ -1,0 +1,76 @@
+project:
+  type: book
+
+publish:
+  gh-pages:
+    branch: gh-pages
+    path: _site
+
+book:
+  title: "Experimental Design for Animal Science"
+  subtitle: "A Practical Guide Using Livestock Examples"
+  author: "Austin Putz"
+  date: today
+
+  page-navigation: true
+
+  chapters:
+    - index.qmd
+    - part: "Core Concepts"
+      chapters:
+        - chapters/01-principles.qmd
+        - chapters/02-crd-rcbd.qmd
+        - chapters/03-factorial.qmd
+    - part: "Advanced Designs"
+      chapters:
+        - chapters/04-nested-hierarchical.qmd
+        - chapters/05-split-plot.qmd
+        - chapters/06-repeated-measures.qmd
+        - chapters/07-crossover-latin.qmd
+    - part: "Planning and Analysis"
+      chapters:
+        - chapters/08-sample-size-power.qmd
+        - chapters/09-ancova.qmd
+        - chapters/10-special-topics.qmd
+
+  appendices:
+    - appendices/datasets.qmd
+    - appendices/r-resources.qmd
+
+  sidebar:
+    style: "docked"
+    background: primary
+    search: true
+
+bibliography: references.bib
+
+format:
+  html:
+    theme:
+      light: [cosmo, custom.scss]
+    toc: true
+    toc-depth: 3
+    toc-location: right
+    toc-title: "Contents"
+    number-sections: true
+    number-depth: 3
+    code-fold: false
+    code-tools: true
+    code-copy: true
+    code-link: true
+    code-overflow: wrap
+    link-external-newwindow: true
+    link-external-icon: true
+    fig-width: 8
+    fig-height: 6
+    fig-align: center
+    df-print: paged
+    smooth-scroll: true
+    css: styles.css
+
+execute:
+  echo: true
+  warning: false
+  message: false
+  cache: false
+  freeze: auto

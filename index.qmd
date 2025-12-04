@@ -1,0 +1,155 @@
+# Preface {.unnumbered}
+
+## Welcome
+
+Welcome to **Experimental Design for Animal Science: A Practical Guide Using Livestock Examples**. This book fills a critical gap in animal science education by providing a comprehensive, species-specific approach to experimental design using exclusively livestock examples.
+
+## Why This Book?
+
+Traditional experimental design textbooks typically rely on examples from agronomy, psychology, or industrial engineering. While these examples teach important principles, they often fail to resonate with animal science students who face unique challenges:
+
+- **Biological Constraints**: Animals are not plots of corn. They grow, reproduce, get sick, and interact with each other in complex ways.
+- **Hierarchical Structure**: Livestock research inherently involves clustering—pigs within pens, cows within herds, chicks within cages.
+- **Economic Reality**: Animal experiments are expensive. You can't simply replicate your way out of design problems.
+- **Ethical Considerations**: Using animals in research demands efficient, well-designed studies that minimize animal numbers while maintaining statistical validity.
+
+This book addresses these challenges head-on with examples drawn exclusively from swine, beef cattle, dairy cattle, poultry, sheep, and meat science research.
+
+## Who Should Use This Book?
+
+This book is designed for:
+
+- **Graduate students** in animal science beginning thesis or dissertation research
+- **Advanced undergraduates** planning honors projects or preparing for graduate school
+- **Faculty** teaching experimental design courses in animal science programs
+- **Researchers** in industry or government seeking to strengthen their experimental design skills
+
+### Prerequisites
+
+Readers should have completed an intermediate biostatistics course and be comfortable with:
+
+- Analysis of variance (ANOVA)
+- Linear regression
+- Basic mixed models concepts
+- R programming fundamentals
+
+If you need a refresher on basic statistics, we recommend reviewing introductory biostatistics materials before proceeding.
+
+## What Makes This Book Different?
+
+### 1. Species-Specific Examples
+
+Every concept is illustrated with realistic livestock scenarios. You'll work through:
+
+- Swine growth studies with pen effects
+- Dairy nutrition trials using Latin square designs
+- Beef feedlot experiments with blocking
+- Poultry production studies with factorial arrangements
+- Meat science tenderness experiments with split-plot designs
+- Sheep growth trials with ANCOVA
+
+### 2. Emphasis on Experimental Units
+
+Understanding what constitutes an experimental unit is the single most critical concept in livestock research. This book dedicates substantial attention to helping you correctly identify experimental units in complex hierarchical designs—a skill that will prevent the pseudoreplication errors that plague many animal science publications.
+
+### 3. Mixed Models Throughout
+
+Modern livestock research demands mixed models. Rather than treating them as an "advanced" topic covered briefly at the end, this book integrates mixed models from the beginning, showing you how to specify random effects, interpret variance components, and use R packages like `lme4` and `nlme`.
+
+### 4. Reproducible R Code
+
+Every analysis includes fully reproducible R code with detailed comments. You can run these examples yourself, modify them for your data, and build your own code library.
+
+### 5. Practical Focus
+
+This book emphasizes practical application over mathematical theory. While we cover the necessary statistical foundations, our goal is to help you design and analyze real experiments, not prove theorems.
+
+## How to Use This Book
+
+### Chapter Organization
+
+Each chapter follows a consistent structure:
+
+1. **Learning Objectives**: Clear outcomes for what you'll learn
+2. **Motivating Example**: A real-world research question to ground the concepts
+3. **Conceptual Explanation**: Why this design matters
+4. **Statistical Theory**: Mathematical foundations (at an appropriate level)
+5. **Worked Examples**: Multiple examples across species
+6. **R Code Demonstrations**: Step-by-step analysis with interpretation
+7. **Common Mistakes**: What to avoid
+8. **Practice Problems**: Exercises to test your understanding
+9. **Further Reading**: Key references for deeper learning
+
+### Suggested Pathways
+
+**For a full course**: Work through Chapters 1-10 sequentially.
+
+**For self-study**: Start with Chapter 1, then focus on the designs most relevant to your research:
+
+- **Pen studies (swine/beef)**: Chapters 1, 2, 4, 8
+- **Meat science**: Chapters 1, 2, 3, 5, 9
+- **Dairy nutrition**: Chapters 1, 2, 6, 7, 8
+- **Growth studies**: Chapters 1, 2, 6, 8, 9
+- **Poultry production**: Chapters 1, 2, 3, 4, 8
+
+**For quick reference**: Chapter 10 includes summary tables and a troubleshooting guide for selecting appropriate designs.
+
+## Software and Data
+
+### R Packages
+
+This book uses the following R packages:
+
+- **Data manipulation**: `tidyverse` (especially `dplyr` and `ggplot2`)
+- **Mixed models**: `lme4`, `nlme`, `lmerTest`
+- **Estimated marginal means**: `emmeans`
+- **Power analysis**: `pwr`, `simr`
+- **Additional tools**: `car`, `broom`, `multcomp`
+
+You can install all required packages with:
+
+```r
+install.packages(c("tidyverse", "lme4", "nlme", "lmerTest",
+                   "emmeans", "pwr", "simr", "car",
+                   "broom", "multcomp"))
+```
+
+### Example Datasets
+
+All datasets used in this book are available in the `data/` directory and can be freely used for teaching and learning. Datasets are realistic simulations based on actual livestock research scenarios.
+
+## Acknowledgments
+
+This book draws on decades of collective experience from animal science researchers who have grappled with the unique challenges of livestock experimentation. We are grateful to the many students whose questions prompted clearer explanations and the colleagues whose critiques sharpened our thinking.
+
+## Getting Help
+
+If you find errors or have suggestions for improvement, please:
+
+1. Check the book's GitHub repository for errata and updates
+2. Submit issues or pull requests with corrections
+3. Contact the author with questions or feedback
+
+## Let's Begin
+
+Experimental design is both an art and a science. The science involves understanding statistical principles; the art involves applying those principles creatively to real-world constraints. By the end of this book, you'll have both the knowledge and the confidence to design and analyze rigorous livestock experiments.
+
+Let's get started with the foundational principles in Chapter 1.
+
+---
+
+**About the Author**
+
+*[Author bio to be added]*
+
+---
+
+```{r}
+#| echo: false
+#| eval: false
+
+# Book build information
+# Built with Quarto
+# R version: {Add R version}
+# Last rendered: {Date will auto-populate}
+```

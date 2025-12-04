@@ -1,0 +1,25 @@
+# Quarto output (GitHub Actions will build these)
+docs/
+_site/
+/.quarto/
+
+# R environment
+.Rproj.user
+.Rhistory
+.RData
+.Ruserdata
+*.Rproj
+
+# renv (keep renv.lock, exclude library)
+renv/library/
+renv/local/
+renv/cellar/
+renv/staging/
+
+# System files
+.DS_Store
+*.log
+*.tmp
+*~
+.vscode/
+.idea/
