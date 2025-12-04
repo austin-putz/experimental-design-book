@@ -639,6 +639,178 @@ This book will be successful if students can:
 
 ---
 
-**Document Version:** 1.0
-**Last Updated:** 2025-10-31
-**Status:** Ready for review and implementation
+## Deployment and Package Management
+
+### GitHub Actions Deployment Setup
+
+**Configured:** 2025-12-04
+
+The book is now deployed automatically via GitHub Actions instead of local `docs/` directory.
+
+**Live Site:** https://austin-putz.github.io/experimental-design-book/
+
+**Repository:** https://github.com/austin-putz/experimental-design-book
+
+#### Key Configuration Files
+
+1. **`.github/workflows/publish.yml`** - Automated build and deploy workflow
+   - Triggers on push to `main` branch
+   - Installs system dependencies (cmake, libcurl, libx11, graphics libraries)
+   - Sets up R 4.4.2 and restores renv packages
+   - Renders Quarto book to `_site/`
+   - Deploys to GitHub Pages
+   - Build time: ~2-5 minutes (with caching)
+
+2. **`renv.lock`** - R package version manifest
+   - Ensures reproducible builds across environments
+   - Contains exact versions of all R packages
+   - Updated via `renv::snapshot()`
+
+3. **`.gitignore`** - Excludes build artifacts
+   - `docs/` - no longer used
+   - `_site/` - build output (created by Quarto)
+   - `renv/library/` - local R packages (not committed)
+   - `_freeze/` - **KEPT in version control** for computation caching
+
+4. **`_quarto.yml`** - Book configuration
+   - `output-dir: _site` - outputs to `_site/` for GitHub Actions
+   - `publish: gh-pages` - configured for GitHub Pages deployment
+
+#### Current R Package Dependencies
+
+**Core Packages (from renv.lock):**
+- tidyverse (includes dplyr, ggplot2, tidyr, readr, purrr, tibble, stringr, forcats)
+- lme4 - Linear mixed-effects models
+- nlme - Nonlinear mixed-effects models
+- emmeans - Estimated marginal means
+- lmerTest - Tests for linear mixed models
+- knitr - Dynamic report generation
+- rmarkdown - R Markdown integration
+- car - Companion to Applied Regression
+- pwr - Power analysis
+- simr - Power simulation for mixed models
+- broom - Tidy model output
+
+**Total Packages:** ~145 (including dependencies)
+
+### Adding New R Packages
+
+When you need to add a new R package to the book:
+
+#### Step 1: Install and Snapshot Locally
+```R
+# In R console at project root
+renv::install("packagename")
+
+# Update the lockfile
+renv::snapshot()
+```
+
+#### Step 2: Commit the Updated Lockfile
+```bash
+git add renv.lock
+git commit -m "Add packagename to dependencies"
+git push
+```
+
+#### Step 3: Automatic Deployment
+- GitHub Actions automatically detects the new `renv.lock`
+- Installs the new package during build
+- Renders and deploys the updated book
+
+**Note:** First build with a new package may take longer (~8-12 minutes) as it compiles from source. Subsequent builds use cached packages (~2-5 minutes).
+
+### Local Development Workflow
+
+#### Preview Book Locally
+```bash
+# Start interactive preview (auto-reloads on changes)
+quarto preview
+
+# Or render once
+quarto render
+# Output: _site/ directory (gitignored)
+```
+
+#### Make Changes and Deploy
+```bash
+# Edit .qmd files
+git add chapters/01-principles.qmd
+git commit -m "Update principles chapter with new example"
+git push
+
+# GitHub Actions automatically rebuilds and deploys
+# Monitor at: https://github.com/austin-putz/experimental-design-book/actions
+```
+
+#### Check Deployment Status
+```bash
+# View recent workflow runs
+gh run list --limit 5
+
+# Watch current run
+gh run watch
+
+# View specific run logs
+gh run view <run-id>
+```
+
+### Troubleshooting Common Issues
+
+**Build Fails with Missing Package:**
+- Ensure package is in `renv.lock` via `renv::snapshot()`
+- Check package is available on CRAN
+- View error logs: `gh run view --log-failed`
+
+**Build Takes Too Long:**
+- First build: 10-20 minutes (normal - compiling packages)
+- Subsequent builds: 2-5 minutes (cached)
+- If always slow, check if cache is being used
+
+**_site/ Directory Not Found:**
+- Ensure `output-dir: _site` in `_quarto.yml`
+- Quarto books default to `_book/` without this setting
+
+**System Dependency Missing:**
+- Edit `.github/workflows/publish.yml`
+- Add package to `Install system dependencies` step
+- Ubuntu package names (e.g., `libcurl4-openssl-dev`)
+
+### Repository Structure (Current)
+
+```
+experimental-design-book/
+├── .github/
+│   └── workflows/
+│       └── publish.yml           # GitHub Actions workflow
+├── .gitignore                    # Excludes docs/, _site/, renv/library/
+├── _quarto.yml                   # Book config (output-dir: _site)
+├── _freeze/                      # Computation cache (committed!)
+├── renv.lock                     # R package versions (committed!)
+├── .Rprofile                     # Activates renv (committed!)
+├── renv/
+│   ├── activate.R               # Bootstrap script (committed!)
+│   ├── settings.json            # renv settings (committed!)
+│   └── library/                 # Local packages (gitignored!)
+├── chapters/
+│   ├── 01-principles.qmd        # ~43KB, well-developed
+│   ├── 02-10.qmd                # Skeleton files (78-114 bytes)
+├── appendices/
+│   ├── datasets.qmd
+│   └── r-resources.qmd
+├── data/                         # Example datasets (empty)
+├── images/                       # Figures (empty)
+├── R/                           # Helper functions (empty)
+├── index.qmd                    # Book homepage
+├── references.bib               # Bibliography
+├── custom.scss                  # Custom styling
+└── styles.css                   # Additional CSS
+```
+
+**Note:** `docs/` directory removed - no longer used for deployment.
+
+---
+
+**Document Version:** 1.1
+**Last Updated:** 2025-12-04
+**Status:** GitHub Actions deployment active and operational
