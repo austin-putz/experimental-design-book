@@ -1,10 +1,10 @@
 project:
   type: book
+  output-dir: _site
 
 publish:
   gh-pages:
     branch: gh-pages
-    path: _site
 
 book:
   title: "Experimental Design for Animal Science"
