@@ -133,6 +133,42 @@ thead {
   font-size: 0.95rem;
 }
 
+// Fix sidebar text colors on dark background
+.sidebar {
+  .sidebar-title {
+    color: #ffffff !important;
+  }
+
+  .sidebar-item {
+    .chapter-number {
+      color: #ffffff !important;
+    }
+
+    a {
+      color: #ffffff !important;
+
+      &:hover {
+        color: #e0e0e0 !important;
+        background-color: rgba(255, 255, 255, 0.1);
+      }
+    }
+  }
+
+  .sidebar-section-header {
+    color: #ffffff !important;
+  }
+
+  // Active chapter
+  .sidebar-item-container .active {
+    background-color: rgba(255, 255, 255, 0.15);
+
+    a {
+      color: #ffffff !important;
+      font-weight: 600;
+    }
+  }
+}
+
 // Figure captions
 figcaption {
   font-style: italic;
